@@ -13,7 +13,9 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <EditText
             android:layout_width="wrap_content"
@@ -26,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="найти"
-            android:id="@+id/search_button"/>
+            android:id="@+id/search_button" />
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView

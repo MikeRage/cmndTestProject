@@ -35,13 +35,16 @@ public class MainActivity extends AppCompatActivity {
     private String BASE_URL = "https://api.github.com/";
     private UsersAdapter adapter;
     private RecyclerView recycler;
-
+    UsersList user_list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         recycler = findViewById(R.id.recycler);
 
+        final EditText edit = (EditText) findViewById(R.id.search_name);
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
         Button search_button = findViewById(R.id.search_button);
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 }
-                search_user(((EditText)findViewById(R.id.search_name)).getText().toString());
+                search_user(edit.getText().toString());
             }
         });
     }
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<UsersList> call, Response<UsersList> response) {
                 if(response.isSuccessful())
                 {
-                    UsersList user_list = response.body();
+                    user_list = response.body();
                     Log.e("response body","list - "+user_list.usersList.size());
 
                     adapter = new UsersAdapter(getApplicationContext(),user_list.usersList);
@@ -88,6 +91,25 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("response_error",t.getMessage());
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("list",user_list);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        user_list = savedInstanceState.getParcelable("list");
+        if(user_list != null) {
+            adapter = new UsersAdapter(getApplicationContext(), user_list.usersList);
+            adapter.mainAvatar = findViewById(R.id.imageAvatar);
+            adapter.container = (FrameLayout) findViewById(R.id.container);
+            recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            recycler.setAdapter(adapter);
+        }
     }
 
     //конвертер для получения ответа в виде строки
