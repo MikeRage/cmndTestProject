@@ -11,14 +11,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Converter;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -27,13 +22,13 @@ import com.example.beletsky_ma.cinemood.POJO.User;
 import com.example.beletsky_ma.cinemood.POJO.UsersList;
 import com.example.beletsky_ma.cinemood.View.UsersAdapter;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity implements MVPInterface.IView{
 
     private String BASE_URL = "https://api.github.com/";
+    private GitHubAPI gitHubAPI;
     private MVPInterface.IPresenter presenter;
     private UsersAdapter adapter;
     private RecyclerView recycler;
@@ -48,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         presenter = new MainPresenter(this);
         recycler = findViewById(R.id.recycler);
 
+        gitHubAPI = RetrofitBuilder.getRestClient();
         adapter = new UsersAdapter(getApplicationContext());
         adapter.mainAvatar = findViewById(R.id.imageAvatar);
         adapter.container = (FrameLayout)findViewById(R.id.container);
@@ -60,9 +56,7 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                presenter.search_button_clicked(view);
-
+                presenter.search_button_clicked(view,edit.getText().toString());
             }
         });
     }
@@ -73,19 +67,13 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+    @Override
     public void search_user()
     {
         String search_name = edit.getText().toString();
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
 
-        GitHubAPI gitFace = retrofit.create(GitHubAPI.class);
-
-        Call<UsersList> users = gitFace.users(search_name);
-
-        users.enqueue(new Callback<UsersList>() {
+        gitHubAPI.users(search_name)
+                .enqueue(new Callback<UsersList>() {
             @Override
             public void onResponse(Call<UsersList> call, Response<UsersList> response) {
                 if(response.isSuccessful())
@@ -101,9 +89,16 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         });
     }
 
+    @Override
+    public void populate_adapter(List<User> response) {
+        adapter.list = response;
+//        Log.e("response body","list - "+user_list.usersList.size());
+        recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        recycler.setAdapter(adapter);
+    }
+
     public void response_success(Response<UsersList> response)
     {
-
         user_list = response.body();
         adapter.list = user_list.usersList;
         Log.e("response body","list - "+user_list.usersList.size());
