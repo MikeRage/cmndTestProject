@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         presenter = new MainPresenter(this);
         recycler = findViewById(R.id.recycler);
 
-        gitHubAPI = RetrofitBuilder.getRestClient();
+//        gitHubAPI = RetrofitBuilder.getRestClient();
         adapter = new UsersAdapter(getApplicationContext());
         adapter.mainAvatar = findViewById(R.id.imageAvatar);
         adapter.container = (FrameLayout)findViewById(R.id.container);
