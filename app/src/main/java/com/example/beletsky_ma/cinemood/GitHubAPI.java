@@ -1,7 +1,7 @@
 package com.example.beletsky_ma.cinemood;
 
-import com.example.beletsky_ma.cinemood.Model.User;
-import com.example.beletsky_ma.cinemood.Model.UsersList;
+import com.example.beletsky_ma.cinemood.POJO.User;
+import com.example.beletsky_ma.cinemood.POJO.UsersList;
 
 import java.util.List;
 

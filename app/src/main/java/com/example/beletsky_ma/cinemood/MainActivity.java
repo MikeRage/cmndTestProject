@@ -5,13 +5,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -23,44 +23,59 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import com.example.beletsky_ma.cinemood.Model.UsersList;
+import com.example.beletsky_ma.cinemood.POJO.User;
+import com.example.beletsky_ma.cinemood.POJO.UsersList;
 import com.example.beletsky_ma.cinemood.View.UsersAdapter;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MVPInterface.IView{
 
     private String BASE_URL = "https://api.github.com/";
+    private MVPInterface.IPresenter presenter;
     private UsersAdapter adapter;
     private RecyclerView recycler;
-    UsersList user_list;
+    public UsersList user_list;
+    public EditText edit;
+    Button search_button;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        presenter = new MainPresenter(this);
         recycler = findViewById(R.id.recycler);
 
-        final EditText edit = (EditText) findViewById(R.id.search_name);
+        adapter = new UsersAdapter(getApplicationContext());
+        adapter.mainAvatar = findViewById(R.id.imageAvatar);
+        adapter.container = (FrameLayout)findViewById(R.id.container);
+
+        edit  = (EditText) findViewById(R.id.search_name);
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-        Button search_button = findViewById(R.id.search_button);
+
+        search_button = findViewById(R.id.search_button);
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                search_user(edit.getText().toString());
+
+                presenter.search_button_clicked(view);
+
             }
         });
     }
 
-    private void search_user(String name)
+    public void manage_keyboard(View view)
     {
-        String search_name = ((EditText)findViewById(R.id.search_name)).getText().toString();
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public void search_user()
+    {
+        String search_name = edit.getText().toString();
         Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -68,21 +83,14 @@ public class MainActivity extends AppCompatActivity {
 
         GitHubAPI gitFace = retrofit.create(GitHubAPI.class);
 
-        Call<UsersList> users = gitFace.users(name);
+        Call<UsersList> users = gitFace.users(search_name);
 
         users.enqueue(new Callback<UsersList>() {
             @Override
             public void onResponse(Call<UsersList> call, Response<UsersList> response) {
                 if(response.isSuccessful())
                 {
-                    user_list = response.body();
-                    Log.e("response body","list - "+user_list.usersList.size());
-
-                    adapter = new UsersAdapter(getApplicationContext(),user_list.usersList);
-                    adapter.mainAvatar = findViewById(R.id.imageAvatar);
-                    adapter.container = (FrameLayout)findViewById(R.id.container);
-                    recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                    recycler.setAdapter(adapter);
+                    response_success(response);
                 }
             }
 
@@ -91,6 +99,16 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("response_error",t.getMessage());
             }
         });
+    }
+
+    public void response_success(Response<UsersList> response)
+    {
+
+        user_list = response.body();
+        adapter.list = user_list.usersList;
+        Log.e("response body","list - "+user_list.usersList.size());
+        recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        recycler.setAdapter(adapter);
     }
 
     @Override
@@ -104,7 +122,8 @@ public class MainActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         user_list = savedInstanceState.getParcelable("list");
         if(user_list != null) {
-            adapter = new UsersAdapter(getApplicationContext(), user_list.usersList);
+            adapter = new UsersAdapter(getApplicationContext());
+            adapter.list = user_list.usersList;
             adapter.mainAvatar = findViewById(R.id.imageAvatar);
             adapter.container = (FrameLayout) findViewById(R.id.container);
             recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -112,7 +131,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //конвертер для получения ответа в виде строки
+    //конвертер для получения ответа в ретрофите в виде строки (без сериализации)
+    /*
     class ToStringConverterFactory extends Converter.Factory {
         private final MediaType MEDIA_TYPE = MediaType.parse("text/plain");
 
@@ -146,4 +166,5 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+    */
 }

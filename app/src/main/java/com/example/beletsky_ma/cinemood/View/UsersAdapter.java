@@ -4,32 +4,21 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.StrikethroughSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.beletsky_ma.cinemood.MainActivity;
-import com.example.beletsky_ma.cinemood.Model.User;
+import com.example.beletsky_ma.cinemood.POJO.User;
 import com.example.beletsky_ma.cinemood.R;
 import com.squareup.picasso.Picasso;
 
@@ -40,15 +29,15 @@ import java.util.List;
  */
 
 
-public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context mContext;
-    private List<User> list;
+    public  List<User> list;
     public ImageView mainAvatar;
     public FrameLayout container;
 
-    public UsersAdapter(Context context, List<User> users) {
-        list = users;
+    public UsersAdapter(Context context) {
+//        list = users;
         mContext = context;
 
     }
