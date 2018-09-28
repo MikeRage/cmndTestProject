@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,32 +29,29 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MVPInterface.IView{
 
-    private String BASE_URL = "https://api.github.com/";
-    private GitHubAPI gitHubAPI;
     private MVPInterface.IPresenter presenter;
     private UsersAdapter adapter;
-    private RecyclerView recycler;
     public UsersList user_list;
-    public EditText edit;
-    Button search_button;
+
+    @BindView(R.id.recycler) RecyclerView recycler;
+    @BindView(R.id.search_name) EditText edit;
+    @BindView(R.id.search_button) Button search_button;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         presenter = new MainPresenter(this);
-        recycler = findViewById(R.id.recycler);
 
-//        gitHubAPI = RetrofitBuilder.getRestClient();
         adapter = new UsersAdapter(getApplicationContext());
         adapter.mainAvatar = findViewById(R.id.imageAvatar);
         adapter.container = (FrameLayout)findViewById(R.id.container);
 
-        edit  = (EditText) findViewById(R.id.search_name);
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
+//        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
 
-        search_button = findViewById(R.id.search_button);
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,44 +63,14 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
     public void manage_keyboard(View view)
     {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        assert imm != null;
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    @Override
-    public void search_user()
-    {
-        String search_name = edit.getText().toString();
-
-        gitHubAPI.users(search_name)
-                .enqueue(new Callback<UsersList>() {
-            @Override
-            public void onResponse(Call<UsersList> call, Response<UsersList> response) {
-                if(response.isSuccessful())
-                {
-                    response_success(response);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UsersList> call, Throwable t) {
-                Log.e("response_error",t.getMessage());
-            }
-        });
     }
 
     @Override
     public void populate_adapter(List<User> response) {
         adapter.list = response;
 //        Log.e("response body","list - "+user_list.usersList.size());
-        recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        recycler.setAdapter(adapter);
-    }
-
-    public void response_success(Response<UsersList> response)
-    {
-        user_list = response.body();
-        adapter.list = user_list.usersList;
-        Log.e("response body","list - "+user_list.usersList.size());
         recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recycler.setAdapter(adapter);
     }
