@@ -11,14 +11,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import com.example.beletsky_ma.cinemood.POJO.User;
 import com.example.beletsky_ma.cinemood.POJO.UsersList;
@@ -36,6 +32,8 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
     @BindView(R.id.recycler) RecyclerView recycler;
     @BindView(R.id.search_name) EditText edit;
     @BindView(R.id.search_button) Button search_button;
+    @BindView(R.id.imageAvatar) ImageView imageAvatar;
+    @BindView(R.id.container) FrameLayout container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +44,8 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         presenter = new MainPresenter(this);
 
         adapter = new UsersAdapter(getApplicationContext());
-        adapter.mainAvatar = findViewById(R.id.imageAvatar);
-        adapter.container = (FrameLayout)findViewById(R.id.container);
-
-//        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-//        imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
+        adapter.mainAvatar = imageAvatar;
+        adapter.container = container;
 
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
     @Override
     public void populate_adapter(List<User> response) {
         adapter.list = response;
-//        Log.e("response body","list - "+user_list.usersList.size());
         recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recycler.setAdapter(adapter);
     }
@@ -88,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements MVPInterface.IVie
         if(user_list != null) {
             adapter = new UsersAdapter(getApplicationContext());
             adapter.list = user_list.usersList;
-            adapter.mainAvatar = findViewById(R.id.imageAvatar);
-            adapter.container = (FrameLayout) findViewById(R.id.container);
+            adapter.mainAvatar = imageAvatar;
+            adapter.container = container;
             recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
             recycler.setAdapter(adapter);
         }
