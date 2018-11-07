@@ -24,6 +24,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by RaamKumr on 3/9/2017.
  */
@@ -43,8 +46,8 @@ import java.util.List;
     }
 
     public class UserViewHolder extends RecyclerView.ViewHolder {
-        public TextView login;
-        public ImageView avatar;
+        @BindView(R.id.login) TextView login;
+        @BindView(R.id.imageAvatar) ImageView avatar;
 
         View v;
 
@@ -52,8 +55,7 @@ import java.util.List;
         {
             super(view);
             v = view;
-            login = (TextView) v.findViewById(R.id.login);
-            avatar = (ImageView) v.findViewById(R.id.imageAvatar);
+            ButterKnife.bind(this,v);
         }
     }
 
@@ -74,7 +76,6 @@ import java.util.List;
         UserViewHolder h = (UserViewHolder) holder;
         final User user = list.get(position);
         h.login.setText(user.login);
-//        h.avatar.setText(order.state);
         Picasso.with(mContext).load((user.avatar_url)).into(h.avatar);
 
         h.avatar.setOnClickListener(new View.OnClickListener() {
@@ -204,6 +205,7 @@ import java.util.List;
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         thumbView.setAlpha(1f);
+                        expandedImageView.setBackgroundColor(Color.parseColor("#00000000"));
                         expandedImageView.setVisibility(View.GONE);
                         mCurrentAnimatorEffect = null;
                     }
